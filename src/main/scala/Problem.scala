@@ -1,17 +1,20 @@
-import cats.syntax.all._
-import upperbound._
-import cats.effect._
-import scala.concurrent.duration._
-import sttp.client4
+import WikiApi.getLinksToArticles
+import com.google.common.util.concurrent.RateLimiter
+import sttp.client4.*
 
-case class Problem(
+import Path._
+
+type Article = String
+
+case class Problem (
   language: String,
   start: String,
   end: String
 )
 
+
 trait ProblemInterface:
-  def solve(problem: Problem): Either[String, List[String]]
+  def solve(problem: Problem, maxPathLength: Int): Option[List[Path]]
   def getProblemFromString(string: String): Problem
 
 object Problem extends ProblemInterface:
@@ -19,32 +22,44 @@ object Problem extends ProblemInterface:
     val tuple = string.substring(1, string.length() - 1).split(",").toVector.map(_.trim)
     Problem(tuple(0), tuple(1), tuple(2))
 
-  override def solve(problem: Problem): Either[String, List[String]] =
-    val MAX_DEPTH = 6
-    val path = List(problem.start)
+  override def solve(problem: Problem, maxPathLength: Int): Option[List[Path]] =
+    val limiter = RateLimiter.create(150) // limit of 150 requests per second
 
-    val limiter = Limiter.start[IO](150 every 1.second) // limit of 200 requests per second
+    _solve(Path(problem.start), problem, maxPathLength, limiter) match {
+      case Some(paths) => Some(paths)
+      case None => None
+    }
 
-    _solve(path, problem, MAX_DEPTH, limiter) match
-      case Some(finalPath) => Right(finalPath)
-      case None => Left("No paths found.")
+/**
+ * @param currentPath
+ * @param problem
+ * @param MAX_DEPTH
+ * @param limiter
+ * @return Returns list of all paths that are final and such that currentPath is their prefix.
+ *         If no paths exist, returns None.
+ */
+def _solve(currentPath: Path, problem: Problem,
+           maxPathLength: Int, limiter: RateLimiter): Option[List[Path]] =
+  if isPathFinal(currentPath, problem) then return Some(List(currentPath))
+  if currentPath.length == maxPathLength then return None
 
-def _solve(path: List[String], problem: Problem, MAX_DEPTH: Int, limiter: Limiter[IO]): Option[List[String]] =
-  if isPathFinal(path, problem) then return Some(path)
-  if path.length == MAX_DEPTH then return None
+  val currentArticle = currentPath.head
 
-  val linkedArticles = limiter.submit(getLinkedArticles(path.head, problem.language))
+  limiter.acquire()
 
-  for article <- linkedArticles do _solve(article :: path, problem, MAX_DEPTH) match {
-    case Some(finalPath) => return Some(finalPath)
-    case None =>
+  val paths = getLinksToArticles(currentArticle, problem.language) match {
+    case Some(links) =>
+      for {
+        link <- links
+      } yield {
+        _solve(link.title :: currentPath, problem, maxPathLength, limiter) match
+          case Some(paths) => paths
+          case None => List()
+      }.flatten
+    case None => List()
   }
 
-  None
+  if paths.nonEmpty then Some(paths) else None
 
-def getLinkedArticles(article: String, language: String): Seq[String] =
-  val url = s"https://$language.wikipedia.org/w/api.php?action=parse&page=$article&format=json&prop=links"
-
-
-def isPathFinal(path: List[String], problem: Problem): Boolean =
+def isPathFinal(path: Path, problem: Problem): Boolean =
   path.head == problem.end

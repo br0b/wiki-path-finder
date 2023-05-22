@@ -10,8 +10,10 @@ lazy val root = project
 
     libraryDependencies ++= Seq(
       "org.scalameta" %% "munit" % "0.7.29" % Test,
-      "org.systemfw" %% "upperbound" % "0.4.0",
-      "dev.zio" %% "zio-json" % "0.5.0",
-      "com.softwaremill.sttp.client3" %% "core" % "3.8.15"
+      "com.softwaremill.sttp.client4" %% "core" % "4.0.0-M1",
+      "com.softwaremill.sttp.client4" %% "circe" % "4.0.0-M1",
+      "com.google.guava" % "guava" % "31.1-jre",
+      "io.circe" %% "circe-core" % "0.14.5",
+      "io.circe" %% "circe-generic" % "0.14.5"
     )
   )
