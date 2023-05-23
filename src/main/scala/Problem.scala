@@ -25,10 +25,9 @@ object Problem extends ProblemInterface:
 
     /**
      * @param pathsFound - solutions for the problem that have already been found
-     * @param pathsToExplore - potential prefixes of solutions
+     * @param pathsToExplore - potential prefixes of solutions that are not solutions
      * @param problem - problem to solve
      * @param maxPathLength - maximal length of path
-     * @param visitedArticles - articles that have already been visited
      * @param limiter - a limiter which limits get requests to the wiki API
      * @return
      */
@@ -37,28 +36,21 @@ object Problem extends ProblemInterface:
       pathsToExplore: Set[Path],
       problem: Problem,
       maxPathLength: Int,
-      visitedArticles: Set[Article],
       limiter: RateLimiter): Set[Path] = {
       if (pathsToExplore.isEmpty) return pathsFound
 
       val newPathsToExplore: Set[Path] = for {
-        path <- pathsToExplore.filter(_.size < maxPathLength)
-        article <- linkedArticles(path.head, problem.language, limiter).diff(visitedArticles)
-      } yield {
-        // debug
-        println(article +: path)
-        article +: path
-      }
+        path <- pathsToExplore
+        article <- linkedArticles(path.head, problem.language, limiter)
+      } yield article +: path
 
       val newPathsFound = newPathsToExplore.filter(isPathFinal(_, problem))
-      val newVisitedArticles = for path <- newPathsToExplore yield path.head
 
       loop(
         pathsFound ++ newPathsFound,
-        newPathsToExplore,
+        newPathsToExplore.filter(_.size < maxPathLength),
         problem,
         maxPathLength,
-        visitedArticles ++ newVisitedArticles,
         limiter
       )
     }
@@ -66,7 +58,7 @@ object Problem extends ProblemInterface:
     val limiter = RateLimiter.create(150) // limit of 150 requests per second
     val pathsToExplore = Set[Path](Path(problem.start))
 
-    val paths: Set[Path] = loop(Set(), pathsToExplore, problem, maxPathLength, Set(problem.start), limiter)
+    val paths: Set[Path] = loop(Set(), pathsToExplore, problem, maxPathLength, limiter)
 
     paths.map(_.reverse)
 
