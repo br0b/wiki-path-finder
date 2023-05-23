@@ -11,31 +11,40 @@ import Problem.*
 import Path.*
 
 @main def main(pathToInputFile: String, pathToOutputFile: String): Unit =
-  val MaxPathLength = 6
-  val MaxSearchTime = 10.seconds
+  val MaxPathLength = 3
+  val MaxSearchTime = 5.minutes
 
-  val bufferedWriterToOutput = getBufferedWriterToOutputFile(pathToOutputFile)
   Using(Source.fromFile(pathToInputFile)) { source =>
 
-    for line <- source.getLines() do {
-      val pathsFuture: Future[Option[List[Path]]] = Future.apply {
-        solve(getProblemFromString(line), MaxPathLength)
-      }
+    val allFoundPaths: Seq[Path] = {
+      for line <- source.getLines().toSeq yield {
+        val pathsFuture: Future[Option[Seq[Path]]] = Future.apply {
+          solve(getProblemFromString(line), MaxPathLength)
+        }
 
-      Await.result(pathsFuture, MaxSearchTime) match
-        case Some(paths) => for path <- paths do savePathToFile(path, bufferedWriterToOutput, pathToOutputFile)
-        case None =>
-    }
+        Await.result(pathsFuture, MaxSearchTime) match
+          case Some(paths) => paths
+          case None => Seq()
+      }
+    }.flatten
+
+    val bufferedWriterToOutput = getBufferedWriterToOutputFile(pathToOutputFile)
+    savePathsToFile(allFoundPaths, bufferedWriterToOutput)
+    bufferedWriterToOutput.close()
   }
-  bufferedWriterToOutput.close()
+
+def savePathsToFile(paths: Seq[Path], bufferedWriterToOutput: BufferedWriter): Unit =
+  val sortedPaths = paths.sorted
+  if sortedPaths.nonEmpty
+  then
+    bufferedWriterToOutput.write(pathToString(sortedPaths.head))
+  else
+    return;
+
+  for path <- sortedPaths.tail do
+    bufferedWriterToOutput.write(s"\n${pathToString(path)}")
 
 def getBufferedWriterToOutputFile(pathToOutputFile: String): BufferedWriter =
-  clearFile(pathToOutputFile)
   val bufferedWriter = new BufferedWriter(new FileWriter(pathToOutputFile, true))
-  bufferedWriter.write("")
+  bufferedWriter.write("") // clear file
   bufferedWriter
-
-def clearFile(pathToFile: String): Unit =
-  val writer = new PrintWriter(pathToFile)
-  writer.print("")
-  writer.close()

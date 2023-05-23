@@ -9,7 +9,7 @@ lazy val root = project
     scalaVersion := scala3Version,
 
     libraryDependencies ++= Seq(
-      "org.scalameta" %% "munit" % "0.7.29" % Test,
+      "org.scalatest" %% "scalatest" % "3.2.16" % Test,
       "com.softwaremill.sttp.client4" %% "core" % "4.0.0-M1",
       "com.softwaremill.sttp.client4" %% "circe" % "4.0.0-M1",
       "com.google.guava" % "guava" % "31.1-jre",

@@ -1,20 +1,21 @@
 import java.io.{BufferedReader, BufferedWriter, FileReader}
 
-type Path = List[String]
+type Path = Seq[String]
 
 trait PathInterface:
   def Path(start: String): Path
-  def pathToString(path: List[String]): String
-  def savePathToFile(path: Path, bufferedWriterToOutput: BufferedWriter, pathToOutputFile: String): Unit
+  def pathToString(path: Path): String
 
 object Path extends PathInterface:
-  override def Path(start: String): Path = List(start)
+  override def Path(start: String): Path = start :: Nil
 
-  override def pathToString(path: List[String]): String =
-    s"(${path.head}, ${listToString(path)})"
+  override def pathToString(path: Path): String =
+    s"(${_pathToString(path)})"
 
-  override def savePathToFile(path: Path, bufferedWriterToOutput: BufferedWriter, pathToOutputFile: String): Unit =
-    bufferedWriterToOutput.append(s"${pathToString(path)}\n")
 
-def listToString(list: List[String]): String =
-  s"${list.head}, ${listToString(list.tail)}"
+def _pathToString(path: Path): String =
+  if path.size > 1
+  then
+    s"${path.head}, ${_pathToString(path.tail)}"
+  else
+    s"${path.head}"
