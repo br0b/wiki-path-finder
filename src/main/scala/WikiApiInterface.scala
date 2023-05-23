@@ -75,9 +75,7 @@ def getAllLinksFromJson(jsonRaw: String): Set[Link] =
   val jsonRawWithReplacedAsterixes = jsonRaw.replaceAll("\\*", "article")
   parse(jsonRawWithReplacedAsterixes) match {
     case Right(json) =>
-      val hcursora = json.hcursor
-      val hcursorb = hcursora.downField("parse")
-      hcursorb.get[Set[Link]]("links") match
+      json.hcursor.downField("parse").get[Set[Link]]("links") match
         case Right(links: Set[Link]) => links
         case Left(decodingFailure: DecodingFailure) =>
           println(decodingFailure.getMessage)
