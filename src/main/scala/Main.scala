@@ -10,9 +10,9 @@ import Problem.*
 import Path.*
 
 @main def main(pathToInputFile: String, pathToOutputFile: String): Unit =
-  val MaxPathLength = 6
-  val NumberOfTopResultsToOutput = 1
-  val MaxSearchTime = 30.minutes
+  val MaxPathLength = 3
+  val NumberOfTopResultsToOutput = 3
+  val MaxSearchTime = 10.minutes // Maximal time for which the program tries to solve a problem.
 
   Using(Source.fromFile(pathToInputFile)) { source =>
     val allFoundPaths: Set[Path] = {
