@@ -9,6 +9,10 @@ import scala.concurrent.duration._
 import Problem.*
 import Path.*
 
+/**
+ * @param pathToInputFile absolute path to input file
+ * @param pathToOutputFile absolute path to output file
+ */
 @main def main(pathToInputFile: String, pathToOutputFile: String): Unit =
   val MaxPathLength = 3
   val NumberOfTopResultsToOutput = 3
