@@ -11,7 +11,7 @@ case class Problem (
 )
 
 trait ProblemInterface:
-  def solve(problem: Problem, maxPathLength: Int): Option[Seq[Path]]
+  def solve(problem: Problem, maxPathLength: Int): Set[Path]
   def getProblemFromString(string: String): Problem
 
 object Problem extends ProblemInterface:
@@ -29,28 +29,30 @@ object Problem extends ProblemInterface:
       limiter: RateLimiter): Set[Path] = {
       if (pathsToExplore.isEmpty) return pathsFound
 
-      val newPaths = {
-        for {
-          path <- pathsToExplore
-        } yield linkedArticles(path.head, problem.language) +: path
-      }.flatten.diff(visitedArticles)
+      val newPathsToExplore: Set[Path] = for {
+        path <- pathsToExplore
+        article <- linkedArticles(path.head, problem.language).diff(visitedArticles)
+      } yield article +: path
+
+      val newPathsFound = newPathsToExplore.filter(isPathFinal(_, problem))
+      val newVisitedArticles = for path <- newPathsToExplore yield path.head
 
       loop(
-        pathsFound, pathsToExplore, problem, maxPathLength, visitedArticles, limiter
+        newPathsToExplore,
+        pathsFound ++ newPathsFound,
+        problem,
+        maxPathLength,
+        visitedArticles ++ newVisitedArticles,
+        limiter
       )
     }
 
     val limiter = RateLimiter.create(150) // limit of 150 requests per second
     val pathsToExplore = Set[Path](Path(problem.start))
-    val visited = Set[Article](problem.start)
 
-    val paths = loop(Set(), pathsToExplore, problem, maxPathLength, visited, limiter)
+    val paths: Set[Path] = loop(Set(), pathsToExplore, problem, maxPathLength, Set(), limiter)
 
-    if paths.nonEmpty
-    then
-      Some(paths.map(reverse))
-    else
-      None
+    paths.map(_.reverse)
 
 /*
 /**

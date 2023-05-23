@@ -12,24 +12,21 @@ import scala.util.Try
 type Article = String
 
 trait WikiAPIInterface:
-  def linkedArticles(article: String, language: String): Seq[Article]
+  def linkedArticles(article: String, language: String): Set[Article]
 
 object WikiApi extends WikiAPIInterface :
-  override def linkedArticles(article: String, language: String): Seq[Article] =
+  override def linkedArticles(article: String, language: String): Set[Article] =
    val request = basicRequest
       .get(uri"https://$language.wikipedia.org/w/api.php?action=parse&page=$article&prop=links&format=json")
       .response(asString)
 
     val backend = DefaultSyncBackend()
     request.send(backend).body match {
-      case Right(json: String) => getAllLinksFromJson(json) match {
-        case Some(links) =>
-          for link <- links.filter(isLinkLegal) yield link.article
-        case None => None
-      }
+      case Right(json: String) =>
+        for link <- getAllLinksFromJson(json) yield link.article
       case Left(responseCode: String) =>
         println(s"Response code: $responseCode")
-        None
+        Set()
     }
 
 def isLinkLegal(link: Link): Boolean =
@@ -37,20 +34,20 @@ def isLinkLegal(link: Link): Boolean =
     case Some(string) => link.ns == 0
     case None => false
 
-def getAllLinksFromJson(jsonRaw: String): Seq[Link] =
+def getAllLinksFromJson(jsonRaw: String): Set[Link] =
   val jsonRawWithReplacedAsterixes = jsonRaw.replaceAll("\\*", "article")
   parse(jsonRawWithReplacedAsterixes) match {
     case Right(json) =>
       val hcursora = json.hcursor
       val hcursorb = hcursora.downField("parse")
-      hcursorb.get[Seq[Link]]("links") match
-        case Right(links: Seq[Link]) => Some(links)
+      hcursorb.get[Set[Link]]("links") match
+        case Right(links: Set[Link]) => links
         case Left(decodingFailure: DecodingFailure) =>
           println(decodingFailure.getMessage)
-          None
+          Set()
     case Left(errorMessage) => {
       println(errorMessage)
-      None
+      Set()
     }
   }
 

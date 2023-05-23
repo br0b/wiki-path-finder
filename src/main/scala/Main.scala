@@ -5,7 +5,6 @@ import java.io.*
 
 import scala.concurrent._
 import scala.concurrent.duration._
-import ExecutionContext.Implicits.global
 
 import Problem.*
 import Path.*
@@ -16,15 +15,14 @@ import Path.*
 
   Using(Source.fromFile(pathToInputFile)) { source =>
 
-    val allFoundPaths: Seq[Path] = {
-      for line <- source.getLines().toSeq yield {
-        val pathsFuture: Future[Option[Seq[Path]]] = Future.apply {
+    val allFoundPaths: Set[Path] = {
+      for line <- source.getLines().toSet yield {
+        import ExecutionContext.Implicits.global
+        val pathsFuture: Future[Set[Path]] = Future.apply {
           solve(getProblemFromString(line), MaxPathLength)
         }
 
-        Await.result(pathsFuture, MaxSearchTime) match
-          case Some(paths) => paths
-          case None => Seq()
+        Await.result(pathsFuture, MaxSearchTime)
       }
     }.flatten
 
@@ -33,8 +31,8 @@ import Path.*
     bufferedWriterToOutput.close()
   }
 
-def savePathsToFile(paths: Seq[Path], bufferedWriterToOutput: BufferedWriter): Unit =
-  val sortedPaths = paths.sorted
+def savePathsToFile(paths: Set[Path], bufferedWriterToOutput: BufferedWriter): Unit =
+  val sortedPaths = paths.toSeq.sorted
   if sortedPaths.nonEmpty
   then
     bufferedWriterToOutput.write(pathToString(sortedPaths.head))
