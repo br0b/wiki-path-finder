@@ -35,14 +35,14 @@ def savePathsToFile(paths: Set[Path], bufferedWriterToOutput: BufferedWriter): U
   val sortedPaths = paths.toSeq.sorted
   if sortedPaths.nonEmpty
   then
-    bufferedWriterToOutput.write(pathToString(sortedPaths.head))
+    bufferedWriterToOutput.append(pathToString(sortedPaths.head))
   else
     return;
 
   for path <- sortedPaths.tail do
-    bufferedWriterToOutput.write(s"\n${pathToString(path)}")
+    bufferedWriterToOutput.append(s"\n${pathToString(path)}")
 
 def getBufferedWriterToOutputFile(pathToOutputFile: String): BufferedWriter =
-  val bufferedWriter = new BufferedWriter(new FileWriter(pathToOutputFile, true))
+  val bufferedWriter = new BufferedWriter(new FileWriter(pathToOutputFile))
   bufferedWriter.write("") // clear file
   bufferedWriter
