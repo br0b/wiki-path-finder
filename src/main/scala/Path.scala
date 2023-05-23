@@ -4,6 +4,7 @@ import WikiApi._
 /**
  *  A path, where vertices are wikipedia articles and edges are links connecting them.
  *  We define path length as the number of vertices it contains.
+ *  The first article is the beginning, the last one is the end.
  */
 type Path = Seq[Article]
 

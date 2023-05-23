@@ -29,7 +29,7 @@ import Path.*
     savePathsToFile(allFoundPaths, pathToOutputFile)
   }
 
-/** Save output in csv format.
+/** Save output to file. The fields are article titles are comma separated.
  * @param paths paths that are to be saved to file
  * @param pathToOutputFile path to the file where the paths should be saved
  */
