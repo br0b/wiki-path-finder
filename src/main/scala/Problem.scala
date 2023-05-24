@@ -44,7 +44,8 @@ object Problem extends ProblemInterface:
   override def solve(problem: Problem, maxPathLength: Int, numberOfTopResultsToOutput: Int): Set[Path] =
     if (problem.start == problem.end) return Set(Path(problem.end)) // corner case
 
-    val limiter = RateLimiter.create(150) // limit of 150 requests per second
+    val limiter = RateLimiter.create(195) // limit of 195 requests per second.
+                                          // Wikipedia's official rate limit is 200 requests per second.
 
     /** A loop that is used to find the solution using a backtracking algorithm.
      * The pathsToExplore are paths that we know are not solutions,
@@ -58,21 +59,26 @@ object Problem extends ProblemInterface:
      */
     @tailrec def loop(
     pathsFound: Set[Path],
-    pathsToExplore: Set[Path]): Set[Path] = {
+    pathsToExplore: Set[Path],
+    visited: Set[Article]): Set[Path] = {
       if (pathsToExplore.isEmpty || pathsFound.size >= numberOfTopResultsToOutput)
         return pathsFound.toSeq.sorted.take(numberOfTopResultsToOutput).toSet
 
       val newPathsToExplore: Set[Path] = for {
         path <- pathsToExplore
-        article <- linkedArticles(path.head, problem.language, limiter)
-      } yield article +: path
+        article <- linkedArticles(path.head, problem.language, limiter).diff(visited)
+      } yield {
+        article +: path
+      }
 
+      val newVisited = for path <- newPathsToExplore yield path.head
       val newPathsFound = newPathsToExplore.filter(isSolution(_, problem))
 
       loop(
         pathsFound ++ newPathsFound,
-        newPathsToExplore.filter(_.size < maxPathLength) // Filtered paths, that have length maxPathLength,
-                                                         // but are not solutions.
+        newPathsToExplore.filter(_.size < maxPathLength), // Filtered paths, that have length maxPathLength,
+                                                          // but are not solutions.
+        visited ++ newVisited
       )
     }
 
@@ -80,7 +86,7 @@ object Problem extends ProblemInterface:
     val pathsToExplore = Set[Path](Path(problem.start))
 
     // Solutions to our problem
-    val paths: Set[Path] = loop(Set(), pathsToExplore)
+    val paths: Set[Path] = loop(Set(), pathsToExplore, Set(problem.start))
 
     // Return a set of paths in the correct order.
     paths.map(_.reverse)

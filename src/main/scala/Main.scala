@@ -14,7 +14,7 @@ import Path.*
  * @param pathToOutputFile absolute path to output file
  */
 @main def main(pathToInputFile: String, pathToOutputFile: String): Unit =
-  val MaxPathLength = 6
+  val MaxPathLength = 3
   val NumberOfTopResultsToOutput = 3
 
   Using(Source.fromFile(pathToInputFile)) { source =>
