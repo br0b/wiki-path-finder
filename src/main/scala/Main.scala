@@ -13,9 +13,12 @@ import Path.*
  * @param pathToInputFile absolute path to input file
  * @param pathToOutputFile absolute path to output file
  */
-@main def main(pathToInputFile: String, pathToOutputFile: String): Unit =
+@main def main(): Unit =
   val MaxPathLength = 3
   val NumberOfTopResultsToOutput = 3
+
+  val pathToInputFile = getPathToInputFileFromStdIn
+  val pathToOutputFile = getPathToOutputFileFromStdIn
 
   Using(Source.fromFile(pathToInputFile)) { source =>
     val allFoundPaths: Set[Path] = {
@@ -64,6 +67,24 @@ def savePathsToFile(paths: Set[Path], pathToOutputFile: String): Unit =
     bufferedWriterToOutput.append(s"\n${pathToString(path)}")
 
   bufferedWriterToOutput.close()
+
+/**
+ * Prompts user to input the absolute path to the input file.
+ *
+ * @return the absolute path to the output file
+ */
+def getPathToInputFileFromStdIn: String =
+  print("Please enter the absolute path to the input file: ")
+  scala.io.StdIn.readLine()
+
+/**
+ * Prompts user to input the absolute path to the output file.
+ *
+ * @return the absolute path to the output file
+ */
+def getPathToOutputFileFromStdIn: String =
+  print("Please enter the absolute path to the output file: ")
+  scala.io.StdIn.readLine()
 
 /**
  * Get buffered writer to the output file. Clears the file before writing to it.
