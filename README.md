@@ -1,4 +1,4 @@
-# Scala project for Iterators.
+# Scala project for Iterators
 
 ## Purpose
 
