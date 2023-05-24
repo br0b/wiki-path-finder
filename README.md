@@ -10,9 +10,7 @@ the shortest paths between them. The details are in the project specification pr
 
 This project uses the official Wikimedia API. To find the paths it uses a backtracking algorithm.
 
-In the beginning of main there are 
-
-Input and output files can contain spaces (' ') only after commas.
+Paths to the input and output files are taken from stdin.
 
 Each line of the input file corresponds to a problem. In each line there are three words,
 separated by commas. These are respectively a language code, the title of the first article and
@@ -21,7 +19,7 @@ the title of the last article.
 Each line of the output file corresponds to a solution to one of the problems specified in the input file.
 In each line there is at least one word. Multiple words are separated by commas.
 Each word corresponds to a wikipedia article. The first article is the article from which we start and the last
-article is the one we finish on.
+article is the one we finish on. The file can contain spaces (' ') only after commas.
 
 The `iofiles` folder contains example input and output files.
 
