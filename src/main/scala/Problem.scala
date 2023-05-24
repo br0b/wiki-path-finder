@@ -65,7 +65,8 @@ object Problem extends ProblemInterface:
      * @param pathsToExplore    potential prefixes of solutions
      * @param visited           set of visited articles
      * @param currentPathLength the length of paths explored in this iteration
-     * @return                  a set of solutions of size at most backtrackParameters.numberOfTopResultsToOutput
+     * @return                  a sorted seq of solutions of size
+     *                          at most backtrackParameters.numberOfTopResultsToOutput
      */
     @tailrec def loop(solutionsFound: Set[Path], pathsToExplore: Set[Path],
       visited: Set[Article], currentPathLength: Int): Set[Path] = {
@@ -91,16 +92,11 @@ object Problem extends ProblemInterface:
     }
 
     // Solutions to our problem
-    getSortedElementsOfSet(loop(
+    loop(
       Set(),
       Set[Path](Path(problem.start)),
       Set(),
-      1)).map(_.reverse) // Return a set of paths that are in correct order.
-
-def getSortedElementsOfSet(set: Set[Path]): Set[Path] = set
-  .toSeq
-  .sorted
-  .toSet
+      1).map(_.reverse) // Return a set of paths that are in correct order.
 
 /**
  * @param language language of articles
