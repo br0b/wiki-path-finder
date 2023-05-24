@@ -80,7 +80,8 @@ object Problem extends ProblemInterface:
       val newPathsToExplore = (currentPathLength, newSolutionsFound.size) match
         case (backtrackParameters.maxPathLength, _) => Set()
         case (_, numberOfNewSolutionsFound)
-          if numberOfNewSolutionsFound > backtrackParameters.numberOfTopResultsToOutput => Set()
+          if (solutionsFound.size + numberOfNewSolutionsFound) >=
+            backtrackParameters.numberOfTopResultsToOutput => Set()
         case (_, _) => getNewPathsToExplore(pathsToExplore, problem.language, visited, limiter)
 
       loop(
