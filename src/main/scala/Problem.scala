@@ -58,13 +58,11 @@ object Problem extends ProblemInterface:
 
     /**
      * A loop that is used to find the solution using a backtracking algorithm.
-     * The pathsToExplore are paths that we know are not solutions,
-     * but may be prefixes of paths that are.
      * All paths belonging to pathsToExplore have the same length.
      * For convenience, the order of articles in paths is reversed in this loop.
      *
      * @param solutionsFound    solutions for the problem that have already been found
-     * @param pathsToExplore    potential solutions
+     * @param pathsToExplore    potential prefixes of solutions
      * @param visited           set of visited articles
      * @param currentPathLength the length of paths explored in this iteration
      * @return                  a set of solutions of size at most backtrackParameters.numberOfTopResultsToOutput
