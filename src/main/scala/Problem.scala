@@ -74,7 +74,7 @@ object Problem extends ProblemInterface:
       val newPathsToExplore = currentPathLength match
         case some if currentPathLength < backtrackParameters.maxPathLength &&
           newSolutionsFound.size < backtrackParameters.numberOfTopResultsToOutput =>
-            getNewPathsToExplore(pathsToExplore, problem,
+            getNewPathsToExplore(pathsToExplore, problem.language,
                                  visited, limiter)
         case none => Set()
 
@@ -99,13 +99,16 @@ def getSortedTopElementsOfSet(set: Set[Path], numberOfElementsToTake: Int): Set[
   .take(numberOfElementsToTake)
   .toSet
 
-def getNewPathsToExplore(pathsToExplore: Set[Path], problem: Problem,
+
+def getNewPathsToExplore(paths: Set[Path], language: String,
                          visited: Set[Article], limiter: RateLimiter): Set[Path] =
   for {
-    path <- pathsToExplore
-    article <- linkedArticles(path.head, problem.language, limiter).diff(visited)
+    path <- paths
+    // get only article that have not yet been visited
+    article <- linkedArticles(path.head, language, limiter).diff(visited)
   }
   yield {
+    println(article +: path)
     article +: path
   }
 
