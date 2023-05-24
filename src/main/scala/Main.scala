@@ -1,50 +1,71 @@
 import java.io.{BufferedWriter, File, FileWriter}
 import scala.io.{BufferedSource, Source}
 import scala.util.{Success, Try, Using}
-import java.io.*
+import java.io._
 
-import scala.concurrent._
-import scala.concurrent.duration._
+import Problem._
+import Path._
+import BacktrackParameters._
 
-import Problem.*
-import Path.*
+object Main {
+  def main(args: Array[String]): Unit =
+    if !areArgsValid(args) then
+      println("Please run this program with either two arguments or none.")
+      return
 
-/**
- * @param pathToInputFile absolute path to input file
- * @param pathToOutputFile absolute path to output file
- */
-@main def main(): Unit =
-  val MaxPathLength = 3
-  val NumberOfTopResultsToOutput = 3
+    val backtrackParameters = getBacktrackParameters(args)
 
-  val pathToInputFile = getPathToInputFileFromStdIn
-  val pathToOutputFile = getPathToOutputFileFromStdIn
+    val pathToInputFile = getPathToInputFileFromStdIn
+    val pathToOutputFile = getPathToOutputFileFromStdIn
 
-  Using(Source.fromFile(pathToInputFile)) { source =>
-    val allFoundPaths: Set[Path] = {
-      for
-        line <- source.getLines().toSet
-      yield {
-        val problem = getProblemFromString(line)
-        print(s"Looking for paths from ${problem.start} to ${problem.end}... ")
-        val solution = solve(
-          getProblemFromString(line),
-          MaxPathLength,
-          NumberOfTopResultsToOutput
-        )
+    Using(Source.fromFile(pathToInputFile)) { source =>
+      val allFoundPaths: Set[Path] = {
+        for
+          line <- source.getLines().toSet
+        yield {
+          getSolutionsForProblemInLine(line, backtrackParameters)
+        }
+      }.flatten
 
-        if solution.nonEmpty
-        then
-          print(s"${solution.size} paths found.\n")
-        else
-          print("none found.\n")
+      savePathsToFile(allFoundPaths, pathToOutputFile)
+    }
+}
 
-        solution
-      }
-    }.flatten
+def areArgsValid(args: Array[String]): Boolean = args.length match
+  case 0 | 2 => true
+  case _ => false
 
-    savePathsToFile(allFoundPaths, pathToOutputFile)
-  }
+def getBacktrackParameters(strings: Array[String]): BacktrackParameters =
+  val DefaultBacktrackParameters = BacktrackParameters(3, 3)
+
+  BacktrackParameters(
+    args.length
+  )
+
+def getIntFromCommandLineArguments(index: Int, args: Array[String]): Option[Int] =
+  if args.length <= index
+  then
+    None
+  else
+    args(index).toIntOption
+
+def getSolutionsForProblemInLine(line: String, maxPathLength: Int, numberOfTopResultsToOutput: Int): Set[Path] = {
+  val problem = getProblemFromString(line)
+  print(s"Looking for paths from ${problem.start} to ${problem.end}... ")
+  val solution = solve(
+    getProblemFromString(line),
+    maxPathLength,
+    numberOfTopResultsToOutput
+  )
+
+  if solution.nonEmpty
+  then
+    print(s"${solution.size} paths found.\n")
+  else
+    print("none found.\n")
+
+  solution
+}
 
 /**
  * Save output to file. The fields are article titles are comma separated.
