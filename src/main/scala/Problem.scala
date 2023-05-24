@@ -100,6 +100,7 @@ object Problem extends ProblemInterface:
 
 /**
  * Check if a given path is a solution to a given problem.
+ *
  * @param path the path we want to check
  * @param problem we check if path is the solution of this problem
  * @return true if the path is a solution to the problem, false otherwise
