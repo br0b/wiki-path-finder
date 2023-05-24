@@ -4,7 +4,6 @@ import sttp.client4.*
 
 import Path.*
 import WikiApi.*
-import BacktrackParameters._
 
 /**
  * The class of problems this program solves, as specified in the project specification.
@@ -17,6 +16,17 @@ case class Problem (
   language: LanguageCode,
   start: Article,
   end: Article
+)
+
+/**
+ * Backtrack parameters for finding solutions
+ *
+ * @param maxPathLength we are looking for solutions, whose length does not exceed maxPathLength
+ * @param numberOfTopResultsToOutput number of the shortest results to output
+ */
+case class BacktrackParameters(
+  maxPathLength: Int,
+  numberOfTopResultsToOutput: Int
 )
 
 trait ProblemInterface:
