@@ -14,6 +14,9 @@ import scala.util.Try
  *  A wikipedia article. In this project, article's title is the article.
  */
 type Article = String
+/**
+ * A language code, as specified in the project specification provided by Iterators.
+ */
 type LanguageCode = String
 
 /**
