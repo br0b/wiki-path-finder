@@ -62,9 +62,9 @@ object Problem extends ProblemInterface:
      * @return a set of solutions - numberOfTopResultsToOutput paths connecting problem.start to problem.end
      */
     @tailrec def loop(
-    pathsFound: Set[Path],
-    pathsToExplore: Set[Path],
-    visited: Set[Article]): Set[Path] = {
+      pathsFound: Set[Path],
+      pathsToExplore: Set[Path],
+      visited: Set[Article]): Set[Path] = {
       if (pathsToExplore.isEmpty || pathsFound.size >= numberOfTopResultsToOutput)
         return pathsFound.toSeq
           .sorted
