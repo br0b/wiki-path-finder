@@ -1,9 +1,10 @@
+import scala.annotation.tailrec
 import com.google.common.util.concurrent.RateLimiter
 import sttp.client4.*
+
 import Path.*
 import WikiApi.*
-
-import scala.annotation.tailrec
+import BacktrackParameters._
 
 /**
  * The class of problems this program solves, as specified in the project specification.
@@ -23,11 +24,10 @@ trait ProblemInterface:
    * Finds solution for the class of problem specified in the project specification.
    *
    * @param problem to solve
-   * @param maxPathLength we are looking for solutions, whose length does not exceed maxPathLength
-   * @param numberOfTopResultsToOutput number of the shortest results to output
+   * @param backtrackParameters
    * @return a set of numberOfTopResultsToOutput solutions to problem, whose length is at most maxPathLength
    */
-  def solve(problem: Problem, maxPathLength: Int, numberOfTopResultsToOutput: Int): Set[Path]
+  def solve(problem: Problem, backtrackParameters: BacktrackParameters): Set[Path]
 
   /**
    * Converts a string to an object of class Problem.
@@ -44,9 +44,7 @@ object Problem extends ProblemInterface:
     val tuple = problemString.split(",").toVector.map(_.trim)
     Problem(tuple(0), tuple(1), tuple(2))
 
-  override def solve(problem: Problem, maxPathLength: Int, numberOfTopResultsToOutput: Int): Set[Path] =
-    if (problem.start == problem.end) return Set(Path(problem.end)) // corner case
-
+  override def solve(problem: Problem, backtrackParameters: BacktrackParameters): Set[Path] =
     val limiter = RateLimiter.create(195) // limit of 195 requests per second.
                                           // Wikipedia's official rate limit is 200 requests per second.
 
@@ -57,46 +55,59 @@ object Problem extends ProblemInterface:
      * All paths belonging to pathsToExplore have the same length.
      * For convenience, the order of articles in paths is reversed in this loop.
      *
-     * @param pathsFound - solutions for the problem that have already been found
-     * @param pathsToExplore - potential prefixes of solutions that are not solutions
-     * @return a set of solutions - numberOfTopResultsToOutput paths connecting problem.start to problem.end
+     * @param solutionsFound    solutions for the problem that have already been found
+     * @param pathsToExplore    potential solutions
+     * @param visited           set of visited articles
+     * @param currentPathLength the length of paths explored in this iteration
+     * @return                  a set of solutions,
+     *                          that is at most of size backtrackParameters.numberOfTopResultsToOutput
      */
-    @tailrec def loop(
-      pathsFound: Set[Path],
-      pathsToExplore: Set[Path],
-      visited: Set[Article]): Set[Path] = {
-      if (pathsToExplore.isEmpty || pathsFound.size >= numberOfTopResultsToOutput)
-        return pathsFound.toSeq
-          .sorted
-          .take(numberOfTopResultsToOutput)
-          .toSet
+    @tailrec def loop(solutionsFound: Set[Path], pathsToExplore: Set[Path],
+      visited: Set[Article], currentPathLength: Int): Set[Path] = {
+      if pathsToExplore.isEmpty
+      then return getSortedTopElementsOfSet(solutionsFound, backtrackParameters.numberOfTopResultsToOutput)
 
-      val newPathsToExplore: Set[Path] = for {
-        path <- pathsToExplore
-        article <- linkedArticles(path.head, problem.language, limiter).diff(visited)
-      } yield {
-        article +: path
-      }
+      val newSolutionsFound = pathsToExplore.filter(isSolution(_, problem))
 
-      val newVisited = for path <- newPathsToExplore yield path.head
-      val newPathsFound = newPathsToExplore.filter(isSolution(_, problem))
+      val newVisited = for path <- pathsToExplore yield path.head
+
+      val newPathsToExplore = currentPathLength match
+        case some if currentPathLength < backtrackParameters.maxPathLength &&
+          newSolutionsFound.size < backtrackParameters.numberOfTopResultsToOutput =>
+            getNewPathsToExplore(pathsToExplore, problem,
+                                 visited, limiter)
+        case none => Set()
 
       loop(
-        pathsFound ++ newPathsFound,
-        newPathsToExplore.filter(_.size < maxPathLength), // Filtered paths, that have length maxPathLength,
-                                                          // but are not solutions.
-        visited ++ newVisited
+        solutionsFound ++ newSolutionsFound,
+        newPathsToExplore,
+        visited ++ newVisited,
+        currentPathLength + 1
       )
     }
 
-    // At the beginning, there is only one path to consider - the singleton problem.start
-    val pathsToExplore = Set[Path](Path(problem.start))
-
     // Solutions to our problem
-    val paths: Set[Path] = loop(Set(), pathsToExplore, Set(problem.start))
+    loop(
+      Set(),
+      Set[Path](Path(problem.start)),
+      Set(),
+      0).map(_.reverse) // Return a set of paths that are in correct order.
 
-    // Return a set of paths in the correct order.
-    paths.map(_.reverse)
+def getSortedTopElementsOfSet(set: Set[Path], numberOfElementsToTake: Int): Set[Path] = set
+  .toSeq
+  .sorted
+  .take(numberOfElementsToTake)
+  .toSet
+
+def getNewPathsToExplore(pathsToExplore: Set[Path], problem: Problem,
+                         visited: Set[Article], limiter: RateLimiter): Set[Path] =
+  for {
+    path <- pathsToExplore
+    article <- linkedArticles(path.head, problem.language, limiter).diff(visited)
+  }
+  yield {
+    article +: path
+  }
 
 /**
  * Check if a given path is a solution to a given problem.
