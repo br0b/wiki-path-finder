@@ -9,6 +9,7 @@ lazy val root = project
     scalaVersion := scala3Version,
 
     libraryDependencies ++= Seq(
+      "org.scalactic" %% "scalactic" % "3.2.16",
       "org.scalatest" %% "scalatest" % "3.2.16" % Test,
       "com.softwaremill.sttp.client4" %% "core" % "4.0.0-M1",
       "com.softwaremill.sttp.client4" %% "circe" % "4.0.0-M1",
