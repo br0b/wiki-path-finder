@@ -22,14 +22,15 @@ Each word corresponds to a wikipedia article. The first article is the article f
 article is the one we finish on. The file can contain spaces (' ') only after commas.
 
 The `iofiles` folder contains example input and output files.
+Given the example input, the program should take about 210 seconds to evaluate.
 
 ## Command line arguments
 
 There can be either
-    
-  * none - backtrack parameters are assigned their default values (3, 3)
-  * two  - they have to be positive integers. The first one is interpreted as maximal path length and
-           the other as the number of top results to output.
+
+* two  - they have to be positive integers. The first one is interpreted as maximal path length and
+  the other as the number of top results to output
+* none - backtrack parameters are assigned their default values (3, 3)
 
 ## Known bugs
 
