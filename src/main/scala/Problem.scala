@@ -14,17 +14,15 @@ import BacktrackParameters._
  * @param end the end of the path we want to find
  */
 case class Problem (
-  language: String,
-  start: String,
-  end: String
+  language: LanguageCode,
+  start: Article,
+  end: Article
 )
 
 trait ProblemInterface:
   /**
    * Finds solution for the class of problem specified in the project specification.
    *
-   * @param problem to solve
-   * @param backtrackParameters
    * @return a set of numberOfTopResultsToOutput solutions to problem, whose length is at most maxPathLength
    */
   def solve(problem: Problem, backtrackParameters: BacktrackParameters): Set[Path]
@@ -59,8 +57,7 @@ object Problem extends ProblemInterface:
      * @param pathsToExplore    potential solutions
      * @param visited           set of visited articles
      * @param currentPathLength the length of paths explored in this iteration
-     * @return                  a set of solutions,
-     *                          that is at most of size backtrackParameters.numberOfTopResultsToOutput
+     * @return                  a set of solutions of size at most backtrackParameters.numberOfTopResultsToOutput
      */
     @tailrec def loop(solutionsFound: Set[Path], pathsToExplore: Set[Path],
       visited: Set[Article], currentPathLength: Int): Set[Path] = {
@@ -71,12 +68,11 @@ object Problem extends ProblemInterface:
 
       val newVisited = for path <- pathsToExplore yield path.head
 
-      val newPathsToExplore = currentPathLength match
-        case some if currentPathLength < backtrackParameters.maxPathLength &&
-          newSolutionsFound.size < backtrackParameters.numberOfTopResultsToOutput =>
-            getNewPathsToExplore(pathsToExplore, problem.language,
-                                 visited, limiter)
-        case none => Set()
+      val newPathsToExplore = (currentPathLength, newSolutionsFound.size) match
+        case (backtrackParameters.maxPathLength, _) => Set()
+        case (_, numberOfNewSolutionsFound)
+          if numberOfNewSolutionsFound > backtrackParameters.numberOfTopResultsToOutput => Set()
+        case (_, _) => getNewPathsToExplore(pathsToExplore, problem.language, visited, limiter)
 
       loop(
         solutionsFound ++ newSolutionsFound,
@@ -91,7 +87,7 @@ object Problem extends ProblemInterface:
       Set(),
       Set[Path](Path(problem.start)),
       Set(),
-      0).map(_.reverse) // Return a set of paths that are in correct order.
+      1).map(_.reverse) // Return a set of paths that are in correct order.
 
 def getSortedTopElementsOfSet(set: Set[Path], numberOfElementsToTake: Int): Set[Path] = set
   .toSeq
@@ -99,24 +95,28 @@ def getSortedTopElementsOfSet(set: Set[Path], numberOfElementsToTake: Int): Set[
   .take(numberOfElementsToTake)
   .toSet
 
-
-def getNewPathsToExplore(paths: Set[Path], language: String,
+/**
+ * @param language language of articles
+ * @param visited  visited article. We don't consider them anymore
+ * @param limiter  a limiter passed on to WikiApiInterface for limiting rate of GET requests
+ * @return         set of paths that might be prefixes of solutions and are longer than paths taken as input
+ */
+def getNewPathsToExplore(paths: Set[Path], language: LanguageCode,
                          visited: Set[Article], limiter: RateLimiter): Set[Path] =
   for {
     path <- paths
-    // get only article that have not yet been visited
+    // get only articles that have not yet been visited
     article <- linkedArticles(path.head, language, limiter).diff(visited)
   }
   yield {
-    println(article +: path)
     article +: path
   }
 
 /**
  * Check if a given path is a solution to a given problem.
  *
- * @param path the path we want to check
- * @param problem we check if path is the solution of this problem
+ * @param  path the path we want to check
+ * @param  problem we check if path is the solution of this problem
  * @return true if the path is a solution to the problem, false otherwise
  */
 def isSolution(path: Path, problem: Problem): Boolean =

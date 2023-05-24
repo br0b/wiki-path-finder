@@ -14,6 +14,7 @@ import scala.util.Try
  *  A wikipedia article. In this project, article's title is the article.
  */
 type Article = String
+type LanguageCode = String
 
 /**
  * A link that has the same fields as a link specified in a json given by Wikipedia's API.
@@ -37,10 +38,10 @@ trait WikiAPIInterface:
    * @param limiter  a limiter used for rate limiting get requests
    * @return a set of articles connected directly to the "article" article
    */
-  def linkedArticles(article: String, language: String, limiter: RateLimiter): Set[Article]
+  def linkedArticles(article: Article, language: LanguageCode, limiter: RateLimiter): Set[Article]
 
 object WikiApi extends WikiAPIInterface:
-  override def linkedArticles(article: String, language: String, limiter: RateLimiter): Set[Article] =
+  override def linkedArticles(article: Article, language: LanguageCode, limiter: RateLimiter): Set[Article] =
     // A request conforming to the Wikipedia API specification. It retrieves links in a JSON format.
     val request = basicRequest
       .get(uri"https://$language.wikipedia.org/w/api.php?action=parse&page=$article&prop=links&format=json")
@@ -59,18 +60,6 @@ object WikiApi extends WikiAPIInterface:
         println(s"Response code: $responseCode")
         Set()
     }
-
-/**
- * Check if we a solution can contain this link. It has to connect to wikipedia articles and the article it points to
- * has to exist.
- *
- * @param link the link whose legality we check
- * @return true if the link is legal, false otherwise
- */
-def isLinkLegal(link: Link): Boolean =
-  link.exists match
-    case Some(string) => link.ns == 0
-    case None => false
 
 /**
  * Get all links from a json retrieved using Wikipedia's API.
@@ -93,6 +82,18 @@ def getAllLinksFromJson(jsonRaw: String): Set[Link] =
       println(errorMessage)
       Set()
   }
+
+/**
+ * Check if we a solution can contain this link. It has to connect to wikipedia articles and the article it points to
+ * has to exist.
+ *
+ * @param link the link whose legality we check
+ * @return true if the link is legal, false otherwise
+ */
+def isLinkLegal(link: Link): Boolean =
+  link.exists match
+    case Some(string) => link.ns == 0
+    case None => false
 
 /**
  * Check if the article the link points to exists.

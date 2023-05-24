@@ -8,11 +8,14 @@ import Path._
 import BacktrackParameters._
 
 object Main {
+  /**
+   * @param args argument line parameters there can be either
+   *               * none - backtrack parameters are assigned their default values (3, 3)
+   *               * two  - they have to be positive integers.
+   *                        The first one is interpreted as maximal path length and
+   *                        the other as the number of top results to output.
+   */
   def main(args: Array[String]): Unit =
-    if !areArgsValid(args) then
-      println("Please run this program with either two arguments or none.")
-      return
-
     val pathToInputFile = getPathToInputFileFromStdIn
     val pathToOutputFile = getPathToOutputFileFromStdIn
 
@@ -34,10 +37,10 @@ object Main {
     }
 }
 
-def areArgsValid(args: Array[String]): Boolean = args.length match
-  case 0 | 2 => true
-  case _ => false
-
+/**
+ * @param  args comand line arguments
+ * @return either backtrack parameters or an error message
+ */
 def getBacktrackParametersFromCommandLineArguments(args: Array[String]): Either[String, BacktrackParameters] =
   val DefaultBacktrackParameters = BacktrackParameters(3, 3)
 
@@ -53,7 +56,10 @@ def getBacktrackParametersFromCommandLineArguments(args: Array[String]): Either[
       Right(BacktrackParameters(maxPathLength, numberOfTopResultsToOutput))
     case _ => Left("Wrong number of command line arguments.")
 
-
+/**
+ * @param line representing a problem
+ * @return     solution for the given problem
+ */
 def getSolutionsForProblemInLine(line: String, backtrackParameters: BacktrackParameters): Set[Path] = {
   val problem = getProblemFromString(line)
   print(s"Looking for paths from ${problem.start} to ${problem.end}... ")
@@ -74,7 +80,7 @@ def getSolutionsForProblemInLine(line: String, backtrackParameters: BacktrackPar
 /**
  * Save output to file. The fields are article titles are comma separated.
  *
- * @param paths paths that are to be saved to file
+ * @param paths            are to be saved to file
  * @param pathToOutputFile path to the file where the paths should be saved
  */
 def savePathsToFile(paths: Set[Path], pathToOutputFile: String): Unit =
