@@ -24,7 +24,11 @@ import Path.*
       yield {
         val problem = getProblemFromString(line)
         print(s"Looking for paths from ${problem.start} to ${problem.end}... ")
-        val solution = solve(getProblemFromString(line), MaxPathLength, NumberOfTopResultsToOutput)
+        val solution = solve(
+          getProblemFromString(line),
+          MaxPathLength,
+          NumberOfTopResultsToOutput
+        )
 
         if solution.nonEmpty
         then
