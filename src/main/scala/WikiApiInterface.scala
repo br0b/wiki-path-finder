@@ -53,7 +53,8 @@ object WikiApi extends WikiAPIInterface:
     request.send(backend).body match {
       case Right(json: String) =>
         for link <- getAllLinksFromJson(json).filter(isLinkLegal)
-                                             .filter(checkIfArticleExists) yield link.article
+                                             .filter(checkIfArticleExists)
+        yield link.article.replaceAll(" ", "_") // remove spaces with underscore
       case Left(responseCode: String) =>
         println(s"Response code: $responseCode")
         Set()
