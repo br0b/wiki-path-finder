@@ -9,13 +9,16 @@ import WikiApi._
 type Path = Seq[Article]
 
 trait PathInterface:
-  /** Create a path containing a single article and no edges.
+  /**
+   * Create a path containing a single article and no edges.
+   * 
    * @param article the single article belonging to the path
    * @return the new path
    */
   def Path(article: Article): Path
 
-  /** Convert a path to string.
+  /**
+   * Convert a path to string.
    *
    * @param path The path to be converted
    * @return the string representing the path

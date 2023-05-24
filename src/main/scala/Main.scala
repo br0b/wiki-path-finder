@@ -39,7 +39,9 @@ import Path.*
     savePathsToFile(allFoundPaths, pathToOutputFile)
   }
 
-/** Save output to file. The fields are article titles are comma separated.
+/**
+ * Save output to file. The fields are article titles are comma separated.
+ *
  * @param paths paths that are to be saved to file
  * @param pathToOutputFile path to the file where the paths should be saved
  */
@@ -59,7 +61,8 @@ def savePathsToFile(paths: Set[Path], pathToOutputFile: String): Unit =
 
   bufferedWriterToOutput.close()
 
-/** Get buffered writer to the output file. Clears the file before writing to it.
+/**
+ * Get buffered writer to the output file. Clears the file before writing to it.
  *
  * @param pathToOutputFile path to the output file
  * @return the buffered writer
