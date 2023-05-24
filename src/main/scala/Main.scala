@@ -13,18 +13,21 @@ object Main {
       println("Please run this program with either two arguments or none.")
       return
 
-    val backtrackParameters = getBacktrackParameters(args)
-
     val pathToInputFile = getPathToInputFileFromStdIn
     val pathToOutputFile = getPathToOutputFileFromStdIn
+
+    val backtrackParameters = getBacktrackParametersFromCommandLineArguments(args) match
+      case Right(backtrackParameters) => backtrackParameters
+      case Left(errorMessage) =>
+        println(errorMessage)
+        return;
 
     Using(Source.fromFile(pathToInputFile)) { source =>
       val allFoundPaths: Set[Path] = {
         for
           line <- source.getLines().toSet
-        yield {
+        yield
           getSolutionsForProblemInLine(line, backtrackParameters)
-        }
       }.flatten
 
       savePathsToFile(allFoundPaths, pathToOutputFile)
@@ -35,27 +38,28 @@ def areArgsValid(args: Array[String]): Boolean = args.length match
   case 0 | 2 => true
   case _ => false
 
-def getBacktrackParameters(strings: Array[String]): BacktrackParameters =
+def getBacktrackParametersFromCommandLineArguments(args: Array[String]): Either[String, BacktrackParameters] =
   val DefaultBacktrackParameters = BacktrackParameters(3, 3)
 
-  BacktrackParameters(
-    args.length
-  )
+  args.length match
+    case 0 => Right(DefaultBacktrackParameters)
+    case 2 =>
+      val maxPathLength = args(0).toIntOption match
+        case Some(int) => int
+        case None => return Left("Wrong maximum length of path.")
+      val numberOfTopResultsToOutput = args(1).toIntOption match
+        case Some(int) => int
+        case None => return Left("Wrong number of top results to output.")
+      Right(BacktrackParameters(maxPathLength, numberOfTopResultsToOutput))
+    case _ => Left("Wrong number of command line arguments.")
 
-def getIntFromCommandLineArguments(index: Int, args: Array[String]): Option[Int] =
-  if args.length <= index
-  then
-    None
-  else
-    args(index).toIntOption
 
-def getSolutionsForProblemInLine(line: String, maxPathLength: Int, numberOfTopResultsToOutput: Int): Set[Path] = {
+def getSolutionsForProblemInLine(line: String, backtrackParameters: BacktrackParameters): Set[Path] = {
   val problem = getProblemFromString(line)
   print(s"Looking for paths from ${problem.start} to ${problem.end}... ")
   val solution = solve(
     getProblemFromString(line),
-    maxPathLength,
-    numberOfTopResultsToOutput
+    backtrackParameters
   )
 
   if solution.nonEmpty
