@@ -96,7 +96,9 @@ object Problem extends ProblemInterface:
       Set(),
       Set[Path](Path(problem.start)),
       Set(),
-      1).map(_.reverse) // Return a set of paths that are in correct order.
+      1)
+      .take(backtrackParameters.numberOfTopResultsToOutput)
+      .map(_.reverse) // Return a set of paths that are in correct order.
 
 /**
  * @param language language of articles
