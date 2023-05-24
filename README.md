@@ -38,4 +38,8 @@ There can be either
  - ~~When querying links using the Wikimedia API, the API sometimes returns links that are hidden and cannot be
 accessed by a wikipedia user without inspecting the webpage's source code.
 Thus, some of the paths returned by this program may not conform to the project specification.~~ <br>
-The hidden links can be accessed to by clicking on buttons and expanding HTML elements.
+The hidden links can be accessed by clicking on buttons and expanding HTML elements.<br>
+For example, at https://en.wikipedia.org/wiki/YouTube, even though a simple search (Ctrl+F)
+for phrase "Poland" gives no results, one can access the link to Poland's wikipedia article by scrolling 
+down to https://en.wikipedia.org/wiki/YouTube#International_and_localization and clicking the
+"Countries with YouTube localization" button.
