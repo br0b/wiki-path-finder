@@ -14,19 +14,25 @@ import Path.*
  * @param pathToOutputFile absolute path to output file
  */
 @main def main(pathToInputFile: String, pathToOutputFile: String): Unit =
-  val MaxPathLength = 3
+  val MaxPathLength = 6
   val NumberOfTopResultsToOutput = 3
-  val MaxSearchTime = 10.minutes // Maximal time for which the program tries to solve a problem.
 
   Using(Source.fromFile(pathToInputFile)) { source =>
     val allFoundPaths: Set[Path] = {
-      for line <- source.getLines().toSet yield {
-        import ExecutionContext.Implicits.global
-        val pathsFuture: Future[Set[Path]] = Future.apply {
-          solve(getProblemFromString(line), MaxPathLength, NumberOfTopResultsToOutput)
-        }
+      for
+        line <- source.getLines().toSet
+      yield {
+        val problem = getProblemFromString(line)
+        print(s"Looking for paths from ${problem.start} to ${problem.end}... ")
+        val solution = solve(getProblemFromString(line), MaxPathLength, NumberOfTopResultsToOutput)
 
-        Await.result(pathsFuture, MaxSearchTime)
+        if solution.nonEmpty
+        then
+          print(s"${solution.size} paths found.\n")
+        else
+          print("none found.\n")
+
+        solution
       }
     }.flatten
 
