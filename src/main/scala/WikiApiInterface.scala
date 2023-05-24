@@ -78,6 +78,8 @@ def isLinkLegal(link: Link): Boolean =
  * @return a set of all links outgoing from the wikipedia article represented by jsonRaw
  */
 def getAllLinksFromJson(jsonRaw: String): Set[Link] =
+  // JSON returned by wiki's api contains asterixes as keys for fields representing article titles.
+  // We wil replace them with the phrase "article".
   val jsonRawWithReplacedAsterixes = jsonRaw.replaceAll("\\*", "article")
   parse(jsonRawWithReplacedAsterixes) match {
     case Right(json) =>
