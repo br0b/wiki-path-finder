@@ -20,6 +20,7 @@ article. The first article is the article from which we start and the last artic
 
 ## Known bugs
 
-When querying links using the Wikimedia API, the API sometimes returns links that are hidden and cannot be
+ - ~~When querying links using the Wikimedia API, the API sometimes returns links that are hidden and cannot be
 accessed by a wikipedia user without inspecting the webpage's source code.
-Thus, some of the paths returned by this program may not conform to the project specification.
+Thus, some of the paths returned by this program may not conform to the project specification.~~ <br>
+The hidden links can be accessed to by clicking on buttons and expanding HTML elements.
