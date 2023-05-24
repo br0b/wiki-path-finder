@@ -5,7 +5,6 @@ import java.io._
 
 import Problem._
 import Path._
-import BacktrackParameters._
 
 object Main {
   /**
