@@ -25,6 +25,14 @@ article is the one we finish on.
 
 The `iofiles` folder contains example input and output files.
 
+## Command line arguments
+
+There can be either
+    
+  * none - backtrack parameters are assigned their default values (3, 3)
+  * two  - they have to be positive integers. The first one is interpreted as maximal path length and
+           the other as the number of top results to output.
+
 ## Known bugs
 
  - ~~When querying links using the Wikimedia API, the API sometimes returns links that are hidden and cannot be

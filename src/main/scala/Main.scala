@@ -10,8 +10,8 @@ import BacktrackParameters._
 object Main {
   /**
    * @param args argument line parameters there can be either
-   *               * none - backtrack parameters are assigned their default values (3, 3)
-   *               * two  - they have to be positive integers.
+   *               (a) none - backtrack parameters are assigned their default values (3, 3)
+   *               (b) two  - they have to be positive integers.
    *                        The first one is interpreted as maximal path length and
    *                        the other as the number of top results to output.
    */
