@@ -70,7 +70,7 @@ object Problem extends ProblemInterface:
     @tailrec def loop(solutionsFound: Set[Path], pathsToExplore: Set[Path],
       visited: Set[Article], currentPathLength: Int): Set[Path] = {
       if pathsToExplore.isEmpty
-      then return getSortedTopElementsOfSet(solutionsFound, backtrackParameters.numberOfTopResultsToOutput)
+      then return solutionsFound
 
       val newSolutionsFound = pathsToExplore.filter(isSolution(_, problem))
 
@@ -91,16 +91,15 @@ object Problem extends ProblemInterface:
     }
 
     // Solutions to our problem
-    loop(
+    getSortedElementsOfSet(loop(
       Set(),
       Set[Path](Path(problem.start)),
       Set(),
-      1).map(_.reverse) // Return a set of paths that are in correct order.
+      1)).map(_.reverse) // Return a set of paths that are in correct order.
 
-def getSortedTopElementsOfSet(set: Set[Path], numberOfElementsToTake: Int): Set[Path] = set
+def getSortedElementsOfSet(set: Set[Path]): Set[Path] = set
   .toSeq
   .sorted
-  .take(numberOfElementsToTake)
   .toSet
 
 /**
