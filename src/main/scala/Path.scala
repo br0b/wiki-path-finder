@@ -11,7 +11,7 @@ type Path = Seq[Article]
 trait PathInterface:
   /**
    * Create a path containing a single article and no edges.
-   * 
+   *
    * @param article the single article belonging to the path
    * @return the new path
    */
