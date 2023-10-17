@@ -1,10 +1,10 @@
-# Scala project for Iterators
+# Wikipedia path finder
 
 ## Purpose
 
 This program takes a list of problems to solve in a form of input file and returns their solutions to an output file.
 The problems this program solves are pathfinding problems. Given two wikipedia articles, this program will return
-the shortest paths between them. The details are in the project specification provided by Iterators.
+the shortest paths between them.
 
 ## Functionality
 
